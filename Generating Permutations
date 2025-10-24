@@ -1,0 +1,48 @@
+
+Dictionary Class
+The Dictionary class will have one field: an ArrayList of String, to hold the list of words. ArrayList is part of the Java API. To use ArrayList you need an import statement for java.util.ArrayList.
+
+Dictionary will have the following methods:
+
+Constructor with one parm, the name of the file which contains the words to be loaded into the Dictionary (a String): The constructor will instantiate the ArrayList, then open the file, read each word from the file using the next method, and call the addWord method (see below) to add each word to the ArrayList of words. If there is any problem opening or reading the file, catch the exception, print an error message, and exit from the program.
+addWord: The addWord method has one parm (a String); it will add the parm to the ArrayList of words.
+lookup: The lookup method has one parm (a String); it will return true if the parm is contained in the Dictionary and will return false if it's not in the Dictionary.
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Dictionary {
+
+    private ArrayList<String> words;
+
+    // Constructor with one parm
+    public Dictionary(String aString) {
+        words = new ArrayList<>(); 
+        try {
+            File file = new File(aString);
+            Scanner input = new Scanner(file);
+
+            while (input.hasNext()) {
+                String word = input.next();
+                addWord(word); // here how is the addWord method will add words from dictionary is it build in method
+            }
+
+            input.close();
+        } catch (FileNotFoundException e) {
+            System.out.println("File not found: " + aString);
+            System.exit(1); 
+        }
+    }
+
+    // Add the parm to the ArrayList of words
+    public void addWord(String aString) {
+        words.add(aString);
+    }
+
+    // Return true if the parm is contained in the Dictionary
+    public boolean lookup(String aString) {
+        return words.contains(aString);
+    }
+}

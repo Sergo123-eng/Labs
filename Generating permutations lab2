@@ -1,0 +1,204 @@
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.ArrayList;
+import java.util.Scanner;
+
+public class Dictionary {
+	ArrayList<String> words=new ArrayList<>();
+	Dictionary(String aString){
+		ArrayList<String> words=new ArrayList<>();
+		try {
+		File myfile=new File(aString);
+		Scanner input=new Scanner(myfile);
+		while(input.hasNext()) {
+			String word=input.next();
+			addWord(word);
+		}
+		input.close();
+		}catch(FileNotFoundException e) {
+			System.out.println("cannot open the file"+ aString);
+			System.exit(1);// does the number in () matters??
+		}
+		
+				
+	
+
+}
+	public void addWord(String aString){
+		words.add(aString);
+	}
+	public boolean lookup(String aString) {
+		
+		return words.contains(aString);// contains here is built in function  right?
+		
+		
+	}
+	
+	
+}
+
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Stack;
+public class PermutationsCalculator {
+	 PermutationsCalculator(){
+		 
+	 }
+	//a stack for calculating the permutations
+	
+
+	 Stack<String> permutationStack = new Stack<>();
+
+	//an ArrayList to hold all permutations
+    ArrayList<String>allPermutations=new ArrayList<>();
+    //an ArrayList to hold unique permutations.
+    ArrayList<String>uniquePermutations=new ArrayList<>();
+    //an ArrayList to hold the unique English words from the permuatations
+    ArrayList<String>uniqueWords=new ArrayList<>();
+    
+    public ArrayList<String> allPermutations(String word) {
+    	allPermutations=new ArrayList<>();
+    	 generatePermutations("", word, allPermutations);
+    	return allPermutations;
+    }
+
+    private void generatePermutations(String prefix, String remaining, ArrayList<String> result) {
+        if (remaining.length() == 0) {
+            result.add(prefix);
+        } else {
+            for (int i = 0; i < remaining.length(); i++) {
+                String newPrefix = prefix + remaining.charAt(i);
+                // substring(beginIndex, endIndex)
+                String newRemaining = remaining.substring(0, i) + remaining.substring(i + 1);
+                generatePermutations(newPrefix, newRemaining, result);
+            }
+        }
+}
+    public ArrayList<String> uniquePermutations(String word){
+    	uniquePermutations=new ArrayList<>();
+    	generatePermutations("", word, uniquePermutations);
+    	uniquePermutations = new ArrayList<>(new HashSet<>(uniquePermutations));
+    	return uniquePermutations;
+    	
+    }
+    public ArrayList<String> uniqueWords(String word) {
+    	uniqueWords=new ArrayList<>();
+    	 generatePermutations("", word, allPermutations);
+    	return uniqueWords;
+    }//if you declare variable as parameter you cannot decalre it inside the method
+    public int numDuplicates() {
+        return allPermutations.size() - new HashSet<>(allPermutations).size();
+    }
+
+    public ArrayList<String> getAllPermutations() {
+    	return allPermutations;
+    }
+    public ArrayList<String> getUniquePermutations() {
+    	return uniquePermutations;
+    }
+    
+    public ArrayList<String> getUniqueWords() {
+    	return uniqueWords;
+    }
+}
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.Queue;
+import java.util.Scanner;
+
+public class PermutationsConsole {
+
+    public static void main(String[] args) throws IOException {
+        // Task 3: Prompt for dictionary file
+        Scanner input = new Scanner(System.in);
+        System.out.print("Enter the name of the dictionary file: ");
+        String filename = input.nextLine();
+        Dictionary dictionary = new Dictionary(filename);
+
+        // Task 5: Read words from user
+        Queue<String> wordQueue = readWordsFromUser(input);
+
+        // Task 6 & 7: Process words and write to output files
+        processWords(wordQueue, dictionary);
+    }
+
+    // Task 5: Helper method to read words from user
+    public static Queue<String> readWordsFromUser(Scanner input) {
+        Queue<String> queue = new LinkedList<>();
+
+        while (true) {
+            System.out.print("Enter a word (or type 'stop' to finish): ");
+            String word = input.nextLine().trim();
+            if (word.equalsIgnoreCase("stop")) break;
+            queue.add(word);
+        }
+
+        return queue;
+    }
+
+    // Task 6 & 7: Helper method to process words and write to files
+    public static void processWords(Queue<String> wordQueue, Dictionary dictionary) throws IOException {
+        PrintWriter permsOut = new PrintWriter(new FileWriter("perms.txt"));
+        PrintWriter analyticsOut = new PrintWriter(new FileWriter("analytics.txt"));
+
+        int totalWords = 0;
+        int totalLength = 0;
+        int totalPerms = 0;
+        int totalEnglish = 0;
+
+        while (!wordQueue.isEmpty()) {
+            String word = wordQueue.poll();
+            totalWords++;
+            totalLength += word.length();
+
+            PermutationsCalculator pc = new PermutationsCalculator();
+            ArrayList<String> all = pc.allPermutations(word);
+            ArrayList<String> unique = pc.uniquePermutations(word);
+            ArrayList<String> english = pc.uniqueWords(word);
+                   
+           
+            // Task 6: Write to perms.txt
+            permsOut.println("=== Word: " + word + " ===");
+            permsOut.println("All permutations:");
+            permsOut.println(all);
+            permsOut.println("Unique permutations:");
+            permsOut.println(unique);
+            permsOut.println("Unique English words:");
+            permsOut.println(english);
+            permsOut.println();
+            permsOut.println("Test line: writing is working.");
+
+            // Task 7: Write per-word analytics to analytics.txt
+            int duplicates = pc.numDuplicates();
+            double avgDup = (double) duplicates / all.size();
+            double avgEnglish = (double) english.size() / unique.size();
+
+            analyticsOut.println("=== Word: " + word + " ===");
+            analyticsOut.println("Duplicates: " + duplicates);
+            analyticsOut.println("Avg duplicate rate: " + String.format("%.2f", avgDup));
+            analyticsOut.println("English words found: " + english.size());
+            analyticsOut.println("Avg English rate: " + String.format("%.2f", avgEnglish));
+            analyticsOut.println();
+
+            totalPerms += all.size();
+            totalEnglish += english.size();
+        }
+
+        // Task 7: Write overall analytics
+        analyticsOut.println("=== Overall Analytics ===");
+        analyticsOut.println("Total words processed: " + totalWords);
+        analyticsOut.println("Average word length: " + (totalWords == 0 ? 0 : (double) totalLength / totalWords));
+        analyticsOut.println("Total permutations: " + totalPerms);
+        analyticsOut.println("Total English words: " + totalEnglish);
+        analyticsOut.println("Average proportion of English words: " +
+                (totalPerms == 0 ? 0 : (double) totalEnglish / totalPerms));
+
+        permsOut.close();
+        analyticsOut.close();
+        System.out.println("Output written to perms.txt and analytics.txt");
+    }
+}
